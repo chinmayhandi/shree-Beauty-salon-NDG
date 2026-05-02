@@ -174,6 +174,97 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function showCustomConfirm(message, onConfirm, onCancel) {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.style.display = 'flex';
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.background = 'rgba(0,0,0,0.6)';
+    overlay.style.zIndex = '3000';
+    overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+    overlay.style.backdropFilter = 'blur(4px)';
+
+    const content = document.createElement('div');
+    content.className = 'modal-content';
+    content.style.background = 'var(--color-bg-white, #fff)';
+    content.style.padding = '30px';
+    content.style.borderRadius = 'var(--border-radius-lg, 16px)';
+    content.style.width = '90%';
+    content.style.maxWidth = '400px';
+    content.style.boxShadow = '0 20px 40px rgba(0,0,0,0.2)';
+    content.style.textAlign = 'center';
+
+    const icon = document.createElement('div');
+    icon.innerHTML = '⚠️';
+    icon.style.fontSize = '3rem';
+    icon.style.marginBottom = '15px';
+
+    const text = document.createElement('p');
+    text.innerText = message;
+    text.style.color = 'var(--color-text-main, #333)';
+    text.style.fontSize = '1.05rem';
+    text.style.lineHeight = '1.6';
+    text.style.marginBottom = '25px';
+
+    const btnContainer = document.createElement('div');
+    btnContainer.style.display = 'flex';
+    btnContainer.style.gap = '15px';
+    btnContainer.style.justifyContent = 'center';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.innerText = 'Cancel';
+    cancelBtn.style.padding = '10px 20px';
+    cancelBtn.style.background = '#f4f4f4';
+    cancelBtn.style.color = '#333';
+    cancelBtn.style.border = 'none';
+    cancelBtn.style.borderRadius = '50px';
+    cancelBtn.style.cursor = 'pointer';
+    cancelBtn.style.fontWeight = '600';
+    cancelBtn.style.fontFamily = 'inherit';
+    cancelBtn.style.transition = 'background 0.3s';
+    cancelBtn.onmouseover = () => cancelBtn.style.background = '#e0e0e0';
+    cancelBtn.onmouseout = () => cancelBtn.style.background = '#f4f4f4';
+
+    const confirmBtn = document.createElement('button');
+    confirmBtn.innerText = 'I Understand';
+    confirmBtn.style.padding = '10px 20px';
+    confirmBtn.style.background = 'var(--color-primary-main, #e91e63)';
+    confirmBtn.style.color = '#fff';
+    confirmBtn.style.border = 'none';
+    confirmBtn.style.borderRadius = '50px';
+    confirmBtn.style.cursor = 'pointer';
+    confirmBtn.style.fontWeight = '600';
+    confirmBtn.style.fontFamily = 'inherit';
+    confirmBtn.style.transition = 'background 0.3s';
+    confirmBtn.onmouseover = () => confirmBtn.style.background = 'var(--color-primary-dark, #c2185b)';
+    confirmBtn.onmouseout = () => confirmBtn.style.background = 'var(--color-primary-main, #e91e63)';
+
+    cancelBtn.onclick = () => {
+      document.body.removeChild(overlay);
+      if (onCancel) onCancel();
+    };
+
+    confirmBtn.onclick = () => {
+      document.body.removeChild(overlay);
+      if (onConfirm) onConfirm();
+    };
+
+    btnContainer.appendChild(cancelBtn);
+    btnContainer.appendChild(confirmBtn);
+
+    content.appendChild(icon);
+    content.appendChild(text);
+    content.appendChild(btnContainer);
+    overlay.appendChild(content);
+
+    document.body.appendChild(overlay);
+  }
+
   // --- LOCATION AND ADDRESS LOGIC ---
   function setupLocationLogic(locationSelectId, addressGroupId, addressInputId, paymentNoteId) {
     const locationSelect = document.getElementById(locationSelectId);
@@ -185,31 +276,28 @@ document.addEventListener('DOMContentLoaded', () => {
       locationSelect.addEventListener('change', (e) => {
         if (e.target.value === 'On-Site') {
           // Show Popup for On-Site
-          const isConfirmed = window.confirm(
-            "⚠️ On-Site Service - Advance Payment Required\n\n" +
-            "For On-Site / Customer Location service, 50% advance payment is required to confirm your booking.\n\n" +
-            "After you submit this booking request via WhatsApp, the admin will send you a payment scanner (QR code) on WhatsApp.\n\n" +
-            "Your appointment will be confirmed ONLY after the advance payment is received.\n\n" +
-            "Click OK if you understand, or Cancel to go back."
+          showCustomConfirm(
+            "For On-Site service, 50% advance payment is required to confirm your booking. After submitting your booking request, the admin will send the payment scanner/QR code from this WhatsApp number only: 7338097296. Please make payment only after receiving the scanner from this number.",
+            () => {
+              // I Understand
+              addressGroup.style.display = 'block';
+              addressInput.required = true;
+              paymentNote.innerHTML = '<strong>📱 On-Site Payment:</strong> 50% advance payment required. Admin will send payment scanner from 7338097296 only.';
+            },
+            () => {
+              // Cancel
+              locationSelect.value = 'At Parlour';
+              addressGroup.style.display = 'none';
+              addressInput.required = false;
+              addressInput.value = '';
+              paymentNote.innerHTML = '<strong>🏪 At Parlour:</strong> Payment can be made directly at the parlour.';
+            }
           );
-          
-          if (isConfirmed) {
-            addressGroup.style.display = 'block';
-            addressInput.required = true;
-            paymentNote.innerHTML = '<strong>📱 On-Site Payment:</strong> 50% advance payment required. After booking, admin will send you a payment scanner (QR code) on WhatsApp. Your booking will be confirmed only after payment.';
-          } else {
-            // Revert to At Parlour
-            locationSelect.value = 'At Parlour';
-            addressGroup.style.display = 'none';
-            addressInput.required = false;
-            addressInput.value = '';
-            paymentNote.innerHTML = '<strong>🏪 At Parlour:</strong> Payment can be made directly at the parlour. No advance payment needed.';
-          }
         } else {
           addressGroup.style.display = 'none';
           addressInput.required = false;
           addressInput.value = '';
-          paymentNote.innerHTML = '<strong>🏪 At Parlour:</strong> Payment can be made directly at the parlour. No advance payment needed.';
+          paymentNote.innerHTML = '<strong>🏪 At Parlour:</strong> Payment can be made directly at the parlour.';
         }
       });
     }
@@ -250,7 +338,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       text += `Preferred Date: ${date}\n`;
       text += `Preferred Time: ${time}\n`;
-      text += `Payment Note: ${paymentNote}\n`;
+      
+      let noteText = location === 'On-Site' 
+        ? "50% advance payment required. Admin will send payment scanner from 7338097296 only." 
+        : "Payment will be made at the parlour.";
+      text += `Payment Note: ${noteText}\n`;
+      
       if (msg) {
         text += `Message: ${msg}\n`;
       }
@@ -332,7 +425,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       text += `Preferred Date: ${date}\n`;
       text += `Preferred Time: ${time}\n`;
-      text += `Payment Note: ${paymentNote}\n`;
+      
+      let noteText = location === 'On-Site' 
+        ? "50% advance payment required. Admin will send payment scanner from 7338097296 only." 
+        : "Payment will be made at the parlour.";
+      text += `Payment Note: ${noteText}\n`;
+      
       if (msg) {
         text += `Message: ${msg}\n`;
       }
@@ -423,55 +521,7 @@ document.addEventListener('DOMContentLoaded', () => {
     reviewsSlider.addEventListener('touchend', () => slideInterval = setInterval(scrollNext, 3000));
   }
 
-  // --- HOME GALLERY PREVIEW ---
-  const instagramVideos = [
-    { title: "Bridal Makeup Look", thumbnail: "https://images.unsplash.com/photo-1516975080661-46dcbfcac2bd?auto=format&fit=crop&w=400", link: "PASTE_INSTAGRAM_LINK_1" },
-    { title: "Hair Styling Look", thumbnail: "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=400", link: "PASTE_INSTAGRAM_LINK_2" },
-    { title: "Mehendi Design", thumbnail: "https://images.unsplash.com/photo-1563200762-11a54b3ea3c6?auto=format&fit=crop&w=400", link: "PASTE_INSTAGRAM_LINK_3" },
-    { title: "Party Makeup", thumbnail: "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=400", link: "PASTE_INSTAGRAM_LINK_4" },
-    { title: "Facial Treatment", thumbnail: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=400", link: "PASTE_INSTAGRAM_LINK_5" },
-    { title: "Nail Art", thumbnail: "https://images.unsplash.com/photo-1519014816548-bf5fe059e98b?auto=format&fit=crop&w=400", link: "PASTE_INSTAGRAM_LINK_6" }
-  ];
 
-  const youtubeVideos = [
-    { title: "Salon Work Video", thumbnail: "https://images.unsplash.com/photo-1522337660859-02fbefca4702?auto=format&fit=crop&w=400", link: "PASTE_YOUTUBE_LINK_1" },
-    { title: "Bridal Behind The Scenes", thumbnail: "https://images.unsplash.com/photo-1555820598-c8015200bb6b?auto=format&fit=crop&w=400", link: "PASTE_YOUTUBE_LINK_2" }
-  ];
-
-  function renderGallery(containerId, videos, platform) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    
-    // Add comments as requested
-    container.innerHTML = `<!-- Add ${platform} video links here -->`;
-
-    videos.forEach(video => {
-      const item = document.createElement('div');
-      item.className = 'gallery-item';
-      item.style.position = 'relative';
-      item.style.borderRadius = 'var(--border-radius-md)';
-      item.style.overflow = 'hidden';
-      item.style.boxShadow = 'var(--shadow-sm)';
-      item.style.background = '#000';
-      item.style.aspectRatio = '9/16';
-      
-      const btnText = platform === 'Instagram' ? 'Watch on Instagram' : 'Watch on YouTube';
-      const btnBg = platform === 'Instagram' ? 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)' : '#FF0000';
-
-      item.innerHTML = `
-        <img src="${video.thumbnail}" alt="${video.title}" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.8; transition: var(--transition);">
-        <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 20px; background: linear-gradient(transparent, rgba(0,0,0,0.8));">
-          <h4 style="color: white; margin-bottom: 15px; font-size: 1.1rem; font-family: var(--font-heading); text-align: center;">${video.title}</h4>
-          <a href="${video.link}" target="_blank" style="display: block; width: 100%; text-align: center; background: ${btnBg}; color: white; padding: 10px; border-radius: 50px; font-weight: 500; font-size: 0.9rem; text-decoration: none; transition: opacity 0.3s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">${btnText}</a>
-        </div>
-      `;
-      
-      container.appendChild(item);
-    });
-  }
-
-  renderGallery('insta-videos', instagramVideos, 'Instagram');
-  renderGallery('youtube-videos', youtubeVideos, 'YouTube');
 
 });
 
@@ -539,7 +589,7 @@ window.openBookingModal = function (categoryName, serviceName, locationsString) 
   const addressGroup = document.getElementById('m-address-group');
   if (addressGroup) addressGroup.style.display = 'none';
   const paymentNote = document.getElementById('m-payment-note');
-  if (paymentNote) paymentNote.innerHTML = '<strong>🏪 At Parlour:</strong> Payment can be made directly at the parlour. No advance payment needed.';
+  if (paymentNote) paymentNote.innerHTML = '<strong>🏪 At Parlour:</strong> Payment can be made directly at the parlour.';
 
   modal.style.display = 'flex';
 };
@@ -551,17 +601,37 @@ window.closeBookingModal = function () {
   }
 };
 
-window.switchHomeGalleryTab = function(tabId) {
-  const tabs = document.querySelectorAll('.tab-content');
-  tabs.forEach(tab => tab.classList.remove('active'));
-  
-  const buttons = document.querySelectorAll('.gallery-tabs .tab-btn');
-  buttons.forEach(btn => btn.classList.remove('active'));
-  
-  const activeTab = document.getElementById(tabId);
-  if (activeTab) activeTab.classList.add('active');
-  
-  if (event && event.currentTarget) {
-    event.currentTarget.classList.add('active');
+
+// Auto scroll and highlight on load if hash is present
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.location.hash) {
+    const target = document.querySelector(window.location.hash);
+    if (target) {
+      setTimeout(() => {
+        target.scrollIntoView({ behavior: 'smooth' });
+        target.classList.add('highlight-section');
+        setTimeout(() => target.classList.remove('highlight-section'), 2000);
+      }, 100);
+    }
   }
-};
+
+  // Welcome Popup Logic
+  const popup = document.getElementById('welcomePopup');
+  if (popup && !localStorage.getItem('popupShown')) {
+    setTimeout(() => {
+      popup.style.display = 'flex';
+      setTimeout(() => popup.classList.add('show'), 10);
+    }, 1000); // Show after 1 second
+  }
+});
+
+function closePopup() {
+  const popup = document.getElementById('welcomePopup');
+  if (popup) {
+    popup.classList.remove('show');
+    setTimeout(() => {
+      popup.style.display = 'none';
+    }, 400);
+    localStorage.setItem('popupShown', 'true');
+  }
+}
