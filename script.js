@@ -442,16 +442,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- HOME REVIEWS SLIDER ---
   const reviews = [
-    { name: "Customer 1", rating: 5, text: "Best bridal makeup service, very professional." },
-    { name: "Customer 2", rating: 5, text: "Very clean parlour and friendly staff." },
-    { name: "Customer 3", rating: 5, text: "Hair styling was perfect for my function." },
-    { name: "Customer 4", rating: 4, text: "Facial result was very good and relaxing." },
-    { name: "Customer 5", rating: 5, text: "Mehendi design was neat and beautiful." },
-    { name: "Customer 6", rating: 5, text: "Affordable price and good service." },
-    { name: "Customer 7", rating: 5, text: "Threading was perfect and painless." },
-    { name: "Customer 8", rating: 5, text: "Very hygienic and peaceful environment." },
-    { name: "Customer 9", rating: 5, text: "On-time bridal service, highly recommended." },
-    { name: "Customer 10", rating: 5, text: "Best beauty parlour experience in Nidagundi." }
+    { name: "Sneha Patil", rating: 5, text: "Best bridal makeup service, very professional." },
+    { name: "Pooja Kulkarni", rating: 5, text: "Very clean parlour and friendly staff." },
+    { name: "Anita Deshmukh", rating: 5, text: "Hair styling was perfect for my function." },
+    { name: "Priya Hiremath", rating: 4, text: "Facial result was very good and relaxing." },
+    { name: "Deepa Goudar", rating: 5, text: "Mehendi design was neat and beautiful." },
+    { name: "Kavya Hegde", rating: 5, text: "Affordable price and good service." },
+    { name: "Sunita Jadhav", rating: 5, text: "Threading was perfect and painless." },
+    { name: "Rekha Naik", rating: 5, text: "Very hygienic and peaceful environment." },
+    { name: "Megha Biradar", rating: 5, text: "On-time bridal service, highly recommended." },
+    { name: "Shweta Joshi", rating: 5, text: "Best beauty parlour experience in Nidagundi." }
   ];
 
   const reviewsSlider = document.getElementById('reviews-slider');
